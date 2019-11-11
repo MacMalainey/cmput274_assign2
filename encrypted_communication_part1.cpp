@@ -1,5 +1,7 @@
 /*
-	Basic Blink LED Example
+	CMPUT 274 Assignment #2 Part 1
+	Mackenzie Malainey - 1570494
+	Lora Ma - STUDENT ID #
 */
 #include "Arduino.h"
 
@@ -7,12 +9,16 @@
 
 #define ARDUINO_MODE_PIN 13
 
+// Predefined server and client keys
+
 const uint32_t serverPublicKey = 7;
 const uint32_t serverPrivateKey = 27103;
 const uint32_t serverModulus = 95477;
 const uint32_t clientPublicKey = 11;
 const uint32_t clientPrivateKey = 38291;
 const uint32_t clientModulus = 84823;
+
+// This Arduino's RSA encryption / decryption information
 
 uint32_t d;
 uint32_t n;
@@ -29,10 +35,18 @@ int main(){
 			if (Serial.available())
 			{
 				// Read from computer input
+
+				// Encrypt byte
+
+				// Send to Arduino
 			}
 			if (Serial3.available())
 			{
 				// Read from Arduino input
+
+				// Decrypt byte
+
+				// Send to Computer
 			}	
 		}
 	#else
@@ -46,6 +60,7 @@ int main(){
 
 void setup()
 {
+	// Initialize arduino and serial modules, as well as pins
 	init();
 	Serial.begin(9600);
 	Serial3.begin(9600);
@@ -71,8 +86,13 @@ void setup()
 }
 
 /**
- * Writes an uint32_t to Serial3 , starting from the least - significant
- * and finishing with the most significant byte .
+ * Description:
+ * Writes an uint32_t to Serial3, starting from the least - significant bit
+ * and finishing with the most significant byte.
+ * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
+ * 
+ * Arguments:
+ * num (uint32_t): 32 bit unsigned integer to print to serial3
  */
 void uint32_to_serial3 (uint32_t num)
 {
@@ -82,8 +102,13 @@ void uint32_to_serial3 (uint32_t num)
 	Serial3.write((char) (num >> 24));
 }
 /**
- * Reads an uint32_t from Serial3 , starting from the least - significant
- * and finishing with the most significant byte .
+ * Description:
+ * Reads an uint32_t from Serial3, starting from the least - significant
+ * and finishing with the most significant byte.
+ * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
+ * 
+ * Returns:
+ * num (uint32_t): 32 bit unsigned integer read from Serial3
  */
 uint32_t uint32_from_serial3()
 {
@@ -95,6 +120,18 @@ uint32_t uint32_from_serial3()
 	return num;
 }
 
+/**
+ * Description:
+ * Performs fast modular exponentiation (formula: ((base)^power) % mod)
+ * 
+ * Arguments:
+ * base (uint32_t): base for exponentation
+ * power (uint32_t): exponent for exponentation
+ * mod (uint32_t): number to perform modulus around
+ * 
+ * Returns:
+ * ans (uint32_t): Result of the expression ((base)^power) % mod
+ */
 uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
 {
 	base  = base % mod;
@@ -103,7 +140,7 @@ uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
 	{
 		if (power & 1)
 		{
-			// Perform multiplication step
+			// Perform modulus multiplication
 			uint32_t n = 0;
 			while ((1 << n) < base)
 			{
