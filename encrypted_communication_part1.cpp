@@ -26,33 +26,39 @@ uint32_t e;
 uint32_t m;
 
 int main(){
-	
+
 	setup();
 
 	#if(!TEST_MODE)
 		while(true)
 		{
-			if (Serial.available())
+			if (Serial.available() > 0)
 			{
 				// Read from computer input
+				uint32_t read_input = Serial.read();
 
 				// Encrypt byte
+				uint32_t encrypted = powmod(read_input, serverPublicKey, serverModulus);
 
 				// Send to Arduino
+				Serial3.write(encrypted);
 			}
-			if (Serial3.available())
+			if (Serial3.available() > 0)
 			{
 				// Read from Arduino input
+				uint32_t read_input = Serial3.read();
 
 				// Decrypt byte
+				decrypted = powmod(read_input, serverPrivateKey, serverModulus);
 
 				// Send to Computer
-			}	
+				Serial.write(decrypted);
+			}
 		}
 	#else
 		tests_run();
 	#endif
-	
+
 	Serial.flush();
 	Serial3.flush();
 	return 0;
@@ -90,7 +96,7 @@ void setup()
  * Writes an uint32_t to Serial3, starting from the least - significant bit
  * and finishing with the most significant byte.
  * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
- * 
+ *
  * Arguments:
  * num (uint32_t): 32 bit unsigned integer to print to serial3
  */
@@ -106,7 +112,7 @@ void uint32_to_serial3 (uint32_t num)
  * Reads an uint32_t from Serial3, starting from the least - significant
  * and finishing with the most significant byte.
  * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
- * 
+ *
  * Returns:
  * num (uint32_t): 32 bit unsigned integer read from Serial3
  */
@@ -123,12 +129,12 @@ uint32_t uint32_from_serial3()
 /**
  * Description:
  * Performs fast modular exponentiation (formula: ((base)^power) % mod)
- * 
+ *
  * Arguments:
  * base (uint32_t): base for exponentation
  * power (uint32_t): exponent for exponentation
  * mod (uint32_t): number to perform modulus around
- * 
+ *
  * Returns:
  * ans (uint32_t): Result of the expression ((base)^power) % mod
  */
