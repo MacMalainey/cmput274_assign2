@@ -146,13 +146,13 @@ int main(){
 				// Encrypt byte
 				if (input == '\r' ) {
 					Serial.println();
-					uint32_t encryptedR = powmod('\r', e, m);
+					uint32_t encryptedR = powmod((uint32_t)'\r', e, m);
 					uint32_to_serial3(encryptedR);
-					uint32_t encryptedN = powmod('\n', e, m);
+					uint32_t encryptedN = powmod((uint32_t)'\n', e, m);
 					uint32_to_serial3(encryptedN);
 				} else {
 					Serial.print(input);
-					uint32_t encrypted = powmod(input, e, m);
+					uint32_t encrypted = powmod((uint32_t)input, e, m);
 					uint32_to_serial3(encrypted);
 				}
 			}
