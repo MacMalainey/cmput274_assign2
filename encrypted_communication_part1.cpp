@@ -5,7 +5,7 @@
 */
 #include "Arduino.h"
 
-#include "tests.hpp"
+#include "test.hpp"
 
 #define ARDUINO_MODE_PIN 13
 
@@ -89,6 +89,28 @@ void setup()
 }
 
 
+uint32_t mulmod(uint32_t a, uint32_t b, uint32_t m)
+{
+  uint32_t n = 1;
+  uint32_t ans = 0;
+  uint32_t last_n = 1;
+  b = b % m;
+  while (n <= a)
+  {
+    if ((n & a) > 0)
+    {
+      while (last_n < n)
+      {
+        b = (2*b) % m;
+        last_n <<= 1;
+      }
+      ans = (ans + b) % m;
+    }
+    n <<= 1;
+  }
+  return ans;
+}
+
 /**
  * Description:
  * Performs fast modular exponentiation (formula: ((base)^power) % mod)
@@ -103,69 +125,53 @@ void setup()
  */
 uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
 {
-	base  = base % mod;
-	uint32_t ans = 0;
-	while (power != 0)
-	{
-		if (power & 1)
-		{
-			// Perform modulus multiplication
-			uint32_t n = 0;
-			while ((1 << n) < base)
-			{
-				if ((1 << n) & base)
-				{
-					uint32_t x = base;
-					for (uint32_t i = 0; i < n; i++)
-					{
-						x = (2*x) % mod;
-					}
-					ans = (x + ans) % mod;
-				}
-				n++;
-			}
-		}
-		power /= 2;
-	}
+  uint32_t ans = 1;
+  uint32_t pow_x = base % mod;
 
-	return ans;
+  while (power > 0) {
+    if (power & 1 == 1) {
+      ans = mulmod(pow_x, ans, mod);
+    }
+
+    pow_x = mulmod(pow_x, pow_x, mod);
+
+    power >>= 1;
+  }
+
+  return ans;
 }
 
 int main(){
 
 	setup();
 
-	#if(!TEST_MODE)
-		while(true)
+	while(true)
+	{
+		if (Serial.available() > 0)
 		{
-			if (Serial.available() > 0)
-			{
-				// Read from computer input
-				char input = Serial.read();
+			// Read from computer input
+			char input = Serial.read();
 
-				// Encrypt byte
-				if (input == '\r' ) {
-					Serial.println();
-					uint32_t encryptedR = powmod((uint32_t)'\r', e, m);
-					uint32_to_serial3(encryptedR);
-					uint32_t encryptedN = powmod((uint32_t)'\n', e, m);
-					uint32_to_serial3(encryptedN);
-				} else {
-					Serial.print(input);
-					uint32_t encrypted = powmod((uint32_t)input, e, m);
-					uint32_to_serial3(encrypted);
-				}
-			}
-
-			if (Serial3.available() > 0) {
-				uint32_t read_input = uint32_from_serial3();
-				char decrypted = (char)powmod(read_input, d, n);
-				Serial.print(decrypted);
+			// Encrypt byte
+			if (input == '\r' ) {
+				Serial.println();
+				uint32_t encryptedR = powmod((uint32_t)'\r', e, m);
+				uint32_to_serial3(encryptedR);
+				uint32_t encryptedN = powmod((uint32_t)'\n', e, m);
+				uint32_to_serial3(encryptedN);
+			} else {
+				Serial.print(input);
+				uint32_t encrypted = powmod(input, e, m);
+				uint32_to_serial3(encrypted);
 			}
 		}
-	#else
-		tests_run();
-	#endif
+
+		if (Serial3.available() > 0) {
+			uint32_t read_input = uint32_from_serial3();
+			char decrypted = (char)powmod(read_input, d, n);
+			Serial.print(decrypted);
+		}
+	}
 
 	Serial.flush();
 	Serial3.flush();

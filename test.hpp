@@ -1,0 +1,2 @@
+void powmodTest();
+void mulmodTest();
