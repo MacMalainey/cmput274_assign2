@@ -34,25 +34,25 @@ int main(){
 		{
 			if (Serial.available() > 0)
 			{
-				// Read from computer input
-				uint32_t read_input = Serial.read();
+				char input = Serial.read();				// Read from computer input
 
 				// Encrypt byte
-				uint32_t encrypted = powmod(read_input, serverPublicKey, serverModulus);
-
-				// Send to Arduino
-				Serial3.write(encrypted);
+				if (input == '\r' ) {
+					Serial.println();
+					uint32_t encryptedR = powmod('\r', serverPublicKey, serverModulus);
+					uint32_to_serial3(encryptedR);
+					uint32_t encryptedN = powmod('\n', serverPublicKey, serverModulus);
+					uint32_to_serial3(encryptedN);
+				} else {
+					Serial.print(input);
+					uint32_t encrypted = powmod(input, serverPublicKey, serverModulus);
+					uint32_to_serial3(encrypted);
+				}
 			}
-			if (Serial3.available() > 0)
-			{
-				// Read from Arduino input
-				uint32_t read_input = Serial3.read();
 
-				// Decrypt byte
-				decrypted = powmod(read_input, serverPrivateKey, serverModulus);
-
-				// Send to Computer
-				Serial.write(decrypted);
+			if (Serial3.available() > 0) {
+				char decrypted = (char)powmod(read_input, serverPrivateKey, serverModulus);
+				Serial.print(decrypted);
 			}
 		}
 	#else
