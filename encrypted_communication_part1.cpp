@@ -25,6 +25,8 @@ uint32_t n;
 uint32_t e;
 uint32_t m;
 
+uint32_t debug_d;
+
 
 /**
  * Description:
@@ -78,6 +80,8 @@ void setup()
 		n = serverModulus;
 		e = clientPublicKey;
 		m = clientModulus;
+
+		debug_d = clientPrivateKey;
 	}
 	else
 	{
@@ -141,6 +145,34 @@ uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
   return ans;
 }
 
+// computes the value x^pow mod m ("x to the power of pow" mod m)
+uint32_t powmod2(uint32_t x, uint32_t pow, uint32_t m) {
+  // you will make these uint32_t types
+  // for the final submission
+  uint64_t ans = 1;
+  uint64_t pow_x = x;
+
+  // NOTE: in the full assignment you will have to
+  // replace the 64-bit types with an algorithm that
+  // performs multiplication modulo a 31-bit number while
+  // only using 32-bit types.
+
+  while (pow > 0) {
+    if (pow&1 == 1) {
+      // will replace the following line with a "mulmod" call
+      // discussed on Nov 7 (see also the worksheet posted then)
+      ans = (ans*pow_x)%m;
+    }
+
+    // as well as this line (i.e. call mulmod instead)
+    pow_x = (pow_x*pow_x)%m;
+
+    pow >>= 1; // divides by 2
+  }
+
+  return ans;
+}
+
 int main(){
 
 	setup();
@@ -155,9 +187,9 @@ int main(){
 			// Encrypt byte
 			if (input == '\r' ) {
 				Serial.println();
-				uint32_t encryptedR = powmod((uint32_t)'\r', e, m);
+				uint32_t encryptedR = powmod('\r', e, m);
 				uint32_to_serial3(encryptedR);
-				uint32_t encryptedN = powmod((uint32_t)'\n', e, m);
+				uint32_t encryptedN = powmod('\n', e, m);
 				uint32_to_serial3(encryptedN);
 			} else {
 				Serial.print(input);

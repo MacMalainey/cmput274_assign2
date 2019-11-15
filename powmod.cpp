@@ -60,9 +60,9 @@ void mulmodTest() {
   // you can generate examples by calling, say, pow(2, 15, 37) in Python
   // to compute 2^(15) mod 37
   Serial.println("Beginning mulmod tests...");
-  // mulmodTestOnce(1, 1, 3, 1);
-  // mulmodTestOnce(0, 10, 10, 0);
-  // mulmodTestOnce(1, 5, 1, 0);
+  mulmodTestOnce(1, 1, 3, 1);
+  mulmodTestOnce(0, 10, 10, 0);
+  mulmodTestOnce(1, 5, 1, 0);
   mulmodTestOnce(5, 20, 37, 26);
   mulmodTestOnce(12345, 12345, 123456789, 28942236);
   mulmodTestOnce(123456, 123456, 123456789, 56198889);
@@ -133,34 +133,5 @@ uint32_t powmod(uint32_t x, uint32_t pow, uint32_t m) {
 
   return ans;
 }
-
-// /**
-//  * Description:
-//  * Performs fast modular exponentiation (formula: ((base)^power) % mod)
-//  *
-//  * Arguments:
-//  * base (uint32_t): base for exponentation
-//  * power (uint32_t): exponent for exponentation
-//  * mod (uint32_t): number to perform modulus around
-//  *
-//  * Returns:
-//  * ans (uint32_t): Result of the expression ((base)^power) % mod
-//  */
-// uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
-// {
-// 	base  = base % mod;
-// 	uint32_t ans = 0;
-// 	while (power > 0)
-// 	{
-// 		if (power & 1 == 1)
-// 		{
-// 			// Perform modulus multiplication
-// 			mulmod(base, base, mod);
-// 		}
-// 		power >>= 1;
-// 	}
-
-// 	return ans;
-// }
 
 #endif
