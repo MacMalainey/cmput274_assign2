@@ -25,6 +25,42 @@ uint32_t n;
 uint32_t e;
 uint32_t m;
 
+
+/**
+ * Description:
+ * Writes an uint32_t to Serial3, starting from the least - significant bit
+ * and finishing with the most significant byte.
+ * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
+ *
+ * Arguments:
+ * num (uint32_t): 32 bit unsigned integer to print to serial3
+ */
+void uint32_to_serial3 (uint32_t num)
+{
+	Serial3.write((char) (num >> 0));
+	Serial3.write((char) (num >> 8));
+	Serial3.write((char) (num >> 16));
+	Serial3.write((char) (num >> 24));
+}
+/**
+ * Description:
+ * Reads an uint32_t from Serial3, starting from the least - significant
+ * and finishing with the most significant byte.
+ * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
+ *
+ * Returns:
+ * num (uint32_t): 32 bit unsigned integer read from Serial3
+ */
+uint32_t uint32_from_serial3()
+{
+	uint32_t num = 0;
+	num = num | ((uint32_t) Serial3.read()) << 0;
+	num = num | ((uint32_t) Serial3.read()) << 8;
+	num = num | ((uint32_t) Serial3.read()) << 16;
+	num = num | ((uint32_t) Serial3.read()) << 24;
+	return num;
+}
+
 int main(){
 
 	setup();
@@ -34,7 +70,8 @@ int main(){
 		{
 			if (Serial.available() > 0)
 			{
-				char input = Serial.read();				// Read from computer input
+				// Read from computer input
+				char input = Serial.read();
 
 				// Encrypt byte
 				if (input == '\r' ) {
@@ -51,6 +88,7 @@ int main(){
 			}
 
 			if (Serial3.available() > 0) {
+				char read_input = uint32_from_serial3();
 				char decrypted = (char)powmod(read_input, serverPrivateKey, serverModulus);
 				Serial.print(decrypted);
 			}
@@ -91,40 +129,6 @@ void setup()
 	}
 }
 
-/**
- * Description:
- * Writes an uint32_t to Serial3, starting from the least - significant bit
- * and finishing with the most significant byte.
- * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
- *
- * Arguments:
- * num (uint32_t): 32 bit unsigned integer to print to serial3
- */
-void uint32_to_serial3 (uint32_t num)
-{
-	Serial3.write((char) (num >> 0));
-	Serial3.write((char) (num >> 8));
-	Serial3.write((char) (num >> 16));
-	Serial3.write((char) (num >> 24));
-}
-/**
- * Description:
- * Reads an uint32_t from Serial3, starting from the least - significant
- * and finishing with the most significant byte.
- * (FUNCTION PROVIDED FROM ASSIGNMENT INFORMATION)
- *
- * Returns:
- * num (uint32_t): 32 bit unsigned integer read from Serial3
- */
-uint32_t uint32_from_serial3()
-{
-	uint32_t num = 0;
-	num = num | ((uint32_t) Serial3.read()) << 0;
-	num = num | ((uint32_t) Serial3.read()) << 8;
-	num = num | ((uint32_t) Serial3.read()) << 16;
-	num = num | ((uint32_t) Serial3.read()) << 24;
-	return num;
-}
 
 /**
  * Description:
