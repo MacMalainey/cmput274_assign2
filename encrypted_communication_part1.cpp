@@ -1,7 +1,7 @@
 /*
 	CMPUT 274 Assignment #2 Part 1
 	Mackenzie Malainey - 1570494
-	Lora Ma - STUDENT ID #
+	Lora Ma - 1570935
 */
 #include "Arduino.h"
 
@@ -59,47 +59,6 @@ uint32_t uint32_from_serial3()
 	num = num | ((uint32_t) Serial3.read()) << 16;
 	num = num | ((uint32_t) Serial3.read()) << 24;
 	return num;
-}
-
-int main(){
-
-	setup();
-
-	#if(!TEST_MODE)
-		while(true)
-		{
-			if (Serial.available() > 0)
-			{
-				// Read from computer input
-				char input = Serial.read();
-
-				// Encrypt byte
-				if (input == '\r' ) {
-					Serial.println();
-					uint32_t encryptedR = powmod('\r', serverPublicKey, serverModulus);
-					uint32_to_serial3(encryptedR);
-					uint32_t encryptedN = powmod('\n', serverPublicKey, serverModulus);
-					uint32_to_serial3(encryptedN);
-				} else {
-					Serial.print(input);
-					uint32_t encrypted = powmod(input, serverPublicKey, serverModulus);
-					uint32_to_serial3(encrypted);
-				}
-			}
-
-			if (Serial3.available() > 0) {
-				char read_input = uint32_from_serial3();
-				char decrypted = (char)powmod(read_input, serverPrivateKey, serverModulus);
-				Serial.print(decrypted);
-			}
-		}
-	#else
-		tests_run();
-	#endif
-
-	Serial.flush();
-	Serial3.flush();
-	return 0;
 }
 
 void setup()
@@ -170,4 +129,45 @@ uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
 	}
 
 	return ans;
+}
+
+int main(){
+
+	setup();
+
+	#if(!TEST_MODE)
+		while(true)
+		{
+			if (Serial.available() > 0)
+			{
+				// Read from computer input
+				char input = Serial.read();
+
+				// Encrypt byte
+				if (input == '\r' ) {
+					Serial.println();
+					uint32_t encryptedR = powmod('\r', e, m);
+					uint32_to_serial3(encryptedR);
+					uint32_t encryptedN = powmod('\n', e, m);
+					uint32_to_serial3(encryptedN);
+				} else {
+					Serial.print(input);
+					uint32_t encrypted = powmod(input, e, m);
+					uint32_to_serial3(encrypted);
+				}
+			}
+
+			if (Serial3.available() > 0) {
+				uint32_t read_input = uint32_from_serial3();
+				char decrypted = (char)powmod(read_input, d, n);
+				Serial.print(decrypted);
+			}
+		}
+	#else
+		tests_run();
+	#endif
+
+	Serial.flush();
+	Serial3.flush();
+	return 0;
 }
