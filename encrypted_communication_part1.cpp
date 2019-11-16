@@ -1,7 +1,7 @@
 /*
-	CMPUT 274 Assignment #2 Part 1
-	Mackenzie Malainey - 1570494
-	Lora Ma - 1570935
+    CMPUT 274 Assignment #2 Part 1
+    Mackenzie Malainey - 1570494
+    Lora Ma - 1570935
 */
 #include "Arduino.h"
 
@@ -27,11 +27,12 @@ const uint32_t clientModulus = 84823;
  */
 void uint32_to_serial3 (uint32_t num)
 {
-	Serial3.write(num);
-	Serial3.write(num >> 8);
-	Serial3.write(num >> 16);
-	Serial3.write(num >> 24);
+    Serial3.write(num);
+    Serial3.write(num >> 8);
+    Serial3.write(num >> 16);
+    Serial3.write(num >> 24);
 }
+
 /**
  * Description:
  * Reads an uint32_t from Serial3, starting from the least - significant
@@ -43,54 +44,69 @@ void uint32_to_serial3 (uint32_t num)
  */
 uint32_t uint32_from_serial3()
 {
-	uint32_t num = 0;
-	num = num | ((uint32_t)Serial3.read()) << 0;
-	delay(10);
-	num = num | ((uint32_t)Serial3.read()) << 8;
-	delay(10);
-	num = num | ((uint32_t)Serial3.read()) << 16;
-	delay(10);
-	num = num | ((uint32_t)Serial3.read()) << 24;
-	return num ;
+    uint32_t num = 0;
+    num = num | ((uint32_t)Serial3.read()) << 0;
+    delay(10); // Delay was added because when we read we got no data with our arduinos, this was a fix.
+    num = num | ((uint32_t)Serial3.read()) << 8;
+    delay(10);
+    num = num | ((uint32_t)Serial3.read()) << 16;
+    delay(10);
+    num = num | ((uint32_t)Serial3.read()) << 24;
+    return num ;
 
-}
-
-void setup()
-{
-	// Initialize arduino and serial modules, as well as pins
-	init();
-	Serial.begin(9600);
-	Serial3.begin(9600);
-
-	pinMode(ARDUINO_MODE_PIN, INPUT);
-}
-
-
-uint32_t mulmod(uint32_t a, uint32_t b, uint32_t m)
-{
-  uint32_t n = 1;
-  uint32_t ans = 0;
-  uint32_t last_n = 1;
-  b = b % m;
-  while (n <= a)
-  {
-    if ((n & a) > 0)
-    {
-      while (last_n < n)
-      {
-        b = (2*b) % m;
-        last_n <<= 1;
-      }
-      ans = (ans + b) % m;
-    }
-    n <<= 1;
-  }
-  return ans;
 }
 
 /**
  * Description:
- * Performs fast modular exponentiation (formula: ((base)^power) % mod)
+ * Sets up modules and configures necessary pins
+ */
+void setup()
+{
+    // Initialize arduino and serial modules, as well as pins
+    init();
+    Serial.begin(9600);
+    Serial3.begin(9600);
+
+    pinMode(ARDUINO_MODE_PIN, INPUT);
+}
+
+/**
+ * Description:
+ * Performs modular multiplication [formula: (a * b) % m] using 32 bit integers
+ * 
+ * Parameters:
+ * a (uint32_t): multiplicand
+ * b (uint32_t): multiplier
+ * m (uint32_t): modulus
+ * 
+ * Returns:
+ * result (uint32_t): result of the modular multiplication
+ */
+uint32_t mulmod(uint32_t a, uint32_t b, uint32_t m)
+{
+    uint32_t n = 1;
+    uint32_t ans = 0;
+    uint32_t last_n = 1;
+    b = b % m;
+    while (n <= a)
+    {
+        if ((n & a) > 0)
+        {
+        while (last_n < n)
+        {
+            b = (2*b) % m;
+            last_n <<= 1;
+        }
+        ans = (ans + b) % m;
+        }
+        n <<= 1;
+    }
+    return ans;
+}
+
+/**
+ * Description:
+ * Performs fast modular exponentiation [formula: ((base)^power) % mod]
  *
  * Arguments:
  * base (uint32_t): base for exponentation
@@ -102,79 +118,85 @@ uint32_t mulmod(uint32_t a, uint32_t b, uint32_t m)
  */
 uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
 {
-  uint32_t ans = 1;
-  uint32_t pow_x = base % mod;
+    uint32_t ans = 1;
+    uint32_t pow_x = base % mod;
 
-  while (power > 0) {
-    if (power & 1 == 1) {
-      ans = mulmod(pow_x, ans, mod);
+    while (power > 0)
+    {
+        if (power & 1 == 1)
+        {
+            ans = mulmod(pow_x, ans, mod);
+        }
+
+        pow_x = mulmod(pow_x, pow_x, mod);
+
+        power >>= 1;
     }
 
-    pow_x = mulmod(pow_x, pow_x, mod);
-
-    power >>= 1;
-  }
-
-  return ans;
+    return ans;
 }
 
+/**
+ * Description:
+ * Main entry point of the program
+ */
 int main(){
 
-	setup();
+    setup();
 
-	// This Arduino's RSA encryption / decryption information
+    // This Arduino's RSA encryption / decryption information
 
-	uint32_t d;
-	uint32_t n;
-	uint32_t e;
-	uint32_t m;
+    uint32_t d;
+    uint32_t n;
+    uint32_t e;
+    uint32_t m;
 
-	// Determine if Arduino is configured to be a server or client
+    // Determine if Arduino is configured to be a server or client
 
-	if (digitalRead(ARDUINO_MODE_PIN) == HIGH)
-	{
-		d = serverPrivateKey;
-		n = serverModulus;
-		e = clientPublicKey;
-		m = clientModulus;
-	}
-	else
-	{
-		d = clientPrivateKey;
-		n = clientModulus;
-		e = serverPublicKey;
-		m = serverModulus;
-	}
+    if (digitalRead(ARDUINO_MODE_PIN) == HIGH)
+    {
+        d = serverPrivateKey;
+        n = serverModulus;
+        e = clientPublicKey;
+        m = clientModulus;
+    }
+    else
+    {
+        d = clientPrivateKey;
+        n = clientModulus;
+        e = serverPublicKey;
+        m = serverModulus;
+    }
 
-	while(true)
-	{
-		if (Serial.available() > 0)
-		{
-			// Read from computer input
-			char input = Serial.read();
+    while(true)
+    {
+        if (Serial.available() > 0)
+        {
+            // Read from computer input
+            char input = Serial.read();
 
-			// Encrypt byte
-			if (input == '\r' ) {
-				Serial.println();
-				uint32_t encryptedR = powmod('\r', e, m);
-				uint32_to_serial3(encryptedR);
-				uint32_t encryptedN = powmod('\n', e, m);
-				uint32_to_serial3(encryptedN);
-			} else {
-				Serial.print(input);
-				uint32_t encrypted = powmod(input, e, m);
-				uint32_to_serial3(encrypted);
-			}
-		}
+            // Encrypt byte
+            if (input == '\r' ) {
+                Serial.println();
+                uint32_t encryptedR = powmod('\r', e, m);
+                uint32_to_serial3(encryptedR);
+                uint32_t encryptedN = powmod('\n', e, m);
+                uint32_to_serial3(encryptedN);
+            } else {
+                Serial.print(input);
+                uint32_t encrypted = powmod(input, e, m);
+                uint32_to_serial3(encrypted);
+            }
+        }
 
-		if (Serial3.available() > 0) {
-			uint32_t read_input = uint32_from_serial3();
-			char decrypted = (char)powmod(read_input, d, n);
-			Serial.print(decrypted);
-		}
-	}
+        if (Serial3.available() > 0) {
+            uint32_t read_input = uint32_from_serial3();
+            char decrypted = (char)powmod(read_input, d, n);
+            Serial.print(decrypted);
+        }
+    }
 
-	Serial.flush();
-	Serial3.flush();
-	return 0;
+    Serial.flush();
+    Serial3.flush();
+    return 0;
 }

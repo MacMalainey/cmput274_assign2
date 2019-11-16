@@ -1,0 +1,26 @@
+CMPUT 274 Assignment #2 Part 1
+Mackenzie Malainey - 1570494
+Lora Ma - 1570935
+
+Description:
+ Proof of concept communication using RSA encryption over serial between two Arduinos
+
+Included files:
+ - encrypted_communication_part1.cpp
+ - Makefile
+
+Wiring instructions:
+ -> Note pins on arduino X are denoted as such: PIN (X)
+ -> Two Arduinos are used (denoted A, B)
+ GND (A) -> GND (B)
+ TX3 (A) -> RX3 (B)
+ RX3 (A) -> TX3 (B)
+ PIN 13 (A) -> 560 Ohm Resistor -> 5V (A)
+ PIN 13 (B) -> GND (B)
+
+Note:
+ - uint32_to_serial, uint32_from_serial, and powmod functions used are slight modifications of the provided functions in assignments and lectures
+ - Due to unknown reasons (assumed to be old hardware) a delay had to be added to uint32_from_serial to fix a
+   bug where we read data before the data reached the buffer.
+ - As in the assignment description we assume modulus will never be greater than 31 bits
+
