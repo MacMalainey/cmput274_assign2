@@ -5,8 +5,6 @@
 */
 #include "Arduino.h"
 
-#include "test.hpp"
-
 #define ARDUINO_MODE_PIN 13
 
 // Predefined server and client keys
@@ -17,16 +15,6 @@ const uint32_t serverModulus = 95477;
 const uint32_t clientPublicKey = 11;
 const uint32_t clientPrivateKey = 38291;
 const uint32_t clientModulus = 84823;
-
-// This Arduino's RSA encryption / decryption information
-
-uint32_t d;
-uint32_t n;
-uint32_t e;
-uint32_t m;
-
-uint32_t debug_d;
-
 
 /**
  * Description:
@@ -39,10 +27,10 @@ uint32_t debug_d;
  */
 void uint32_to_serial3 (uint32_t num)
 {
-	Serial3.write((char) (num >> 0));
-	Serial3.write((char) (num >> 8));
-	Serial3.write((char) (num >> 16));
-	Serial3.write((char) (num >> 24));
+	Serial3.write(num);
+	Serial3.write(num >> 8);
+	Serial3.write(num >> 16);
+	Serial3.write(num >> 24);
 }
 /**
  * Description:
@@ -56,11 +44,15 @@ void uint32_to_serial3 (uint32_t num)
 uint32_t uint32_from_serial3()
 {
 	uint32_t num = 0;
-	num = num | ((uint32_t) Serial3.read()) << 0;
-	num = num | ((uint32_t) Serial3.read()) << 8;
-	num = num | ((uint32_t) Serial3.read()) << 16;
-	num = num | ((uint32_t) Serial3.read()) << 24;
-	return num;
+	num = num | ((uint32_t)Serial3.read()) << 0;
+	delay(10);
+	num = num | ((uint32_t)Serial3.read()) << 8;
+	delay(10);
+	num = num | ((uint32_t)Serial3.read()) << 16;
+	delay(10);
+	num = num | ((uint32_t)Serial3.read()) << 24;
+	return num ;
+
 }
 
 void setup()
@@ -71,25 +63,6 @@ void setup()
 	Serial3.begin(9600);
 
 	pinMode(ARDUINO_MODE_PIN, INPUT);
-
-	// Determine if Arduino is configured to be a server or client
-
-	if (digitalRead(ARDUINO_MODE_PIN) == HIGH)
-	{
-		d = serverPrivateKey;
-		n = serverModulus;
-		e = clientPublicKey;
-		m = clientModulus;
-
-		debug_d = clientPrivateKey;
-	}
-	else
-	{
-		d = clientPrivateKey;
-		n = clientModulus;
-		e = serverPublicKey;
-		m = serverModulus;
-	}
 }
 
 
@@ -145,37 +118,33 @@ uint32_t powmod(uint32_t base, uint32_t power, uint32_t mod)
   return ans;
 }
 
-// computes the value x^pow mod m ("x to the power of pow" mod m)
-uint32_t powmod2(uint32_t x, uint32_t pow, uint32_t m) {
-  // you will make these uint32_t types
-  // for the final submission
-  uint64_t ans = 1;
-  uint64_t pow_x = x;
-
-  // NOTE: in the full assignment you will have to
-  // replace the 64-bit types with an algorithm that
-  // performs multiplication modulo a 31-bit number while
-  // only using 32-bit types.
-
-  while (pow > 0) {
-    if (pow&1 == 1) {
-      // will replace the following line with a "mulmod" call
-      // discussed on Nov 7 (see also the worksheet posted then)
-      ans = (ans*pow_x)%m;
-    }
-
-    // as well as this line (i.e. call mulmod instead)
-    pow_x = (pow_x*pow_x)%m;
-
-    pow >>= 1; // divides by 2
-  }
-
-  return ans;
-}
-
 int main(){
 
 	setup();
+
+	// This Arduino's RSA encryption / decryption information
+
+	uint32_t d;
+	uint32_t n;
+	uint32_t e;
+	uint32_t m;
+
+	// Determine if Arduino is configured to be a server or client
+
+	if (digitalRead(ARDUINO_MODE_PIN) == HIGH)
+	{
+		d = serverPrivateKey;
+		n = serverModulus;
+		e = clientPublicKey;
+		m = clientModulus;
+	}
+	else
+	{
+		d = clientPrivateKey;
+		n = clientModulus;
+		e = serverPublicKey;
+		m = serverModulus;
+	}
 
 	while(true)
 	{
