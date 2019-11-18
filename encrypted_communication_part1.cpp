@@ -27,7 +27,7 @@ const uint32_t clientModulus = 84823;
  */
 void uint32_to_serial3 (uint32_t num)
 {
-    Serial3.write(num);
+    Serial3.write(num >> 0);
     Serial3.write(num >> 8);
     Serial3.write(num >> 16);
     Serial3.write(num >> 24);
@@ -46,11 +46,8 @@ uint32_t uint32_from_serial3()
 {
     uint32_t num = 0;
     num = num | ((uint32_t)Serial3.read()) << 0;
-    delay(10); // Delay was added because when we read we got no data with our arduinos, this was a fix.
     num = num | ((uint32_t)Serial3.read()) << 8;
-    delay(10);
     num = num | ((uint32_t)Serial3.read()) << 16;
-    delay(10);
     num = num | ((uint32_t)Serial3.read()) << 24;
     return num ;
 
@@ -189,7 +186,7 @@ int main(){
             }
         }
 
-        if (Serial3.available() > 0) {
+        if (Serial3.available() > 3) {
             uint32_t read_input = uint32_from_serial3();
             char decrypted = (char)powmod(read_input, d, n);
             Serial.print(decrypted);
